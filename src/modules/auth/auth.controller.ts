@@ -6,7 +6,9 @@ import {
   HttpException,
   HttpStatus,
   Post,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { AuthService, RegistrationStatus } from './auth.service';
 
 @Controller('auth')
@@ -27,7 +29,22 @@ export class AuthController {
   }
 
   @Post('login')
-  public async login(@Body() loginUserDto: LoginUserDto): Promise<any> {
-    return await this.authService.login(loginUserDto);
+  public async login(
+    @Body() loginUserDto: LoginUserDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<any> {
+    const result = await this.authService.login(loginUserDto);
+
+    res.cookie('zappit_at', result.access_token, {
+      httpOnly: true,
+      domain: process.env.EXTERNAL_DOMAIN,
+    });
+
+    res.cookie('zappit_rt', result.refresh_token, {
+      httpOnly: true,
+      domain: process.env.EXTERNAL_DOMAIN,
+    });
+
+    return result;
   }
 }

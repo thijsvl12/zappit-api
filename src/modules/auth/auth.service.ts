@@ -29,7 +29,7 @@ export class AuthService {
     return status;
   }
 
-  async login(loginUserDto: LoginUserDto): Promise<any> {
+  async login(loginUserDto: LoginUserDto): Promise<LoginResult> {
     const user = await this.userService.findByLogin(loginUserDto);
 
     const accessToken = await this.tokenService.generateAccessToken(user);
@@ -49,8 +49,8 @@ export interface RegistrationStatus {
   data?: User;
 }
 
-export interface RegistrationSeederStatus {
-  success: boolean;
-  message: string;
-  data?: User[];
+export interface LoginResult {
+  access_token: string;
+  refresh_token: string;
+  data: User;
 }

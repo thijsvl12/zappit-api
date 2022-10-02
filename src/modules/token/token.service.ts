@@ -21,7 +21,7 @@ export class TokenService {
   public async generateRefreshToken(user: User): Promise<string> {
     const token = await this.prisma.refreshToken.create({
       data: {
-        expires: +process.env.JWT_REFRESH_EXPIRE,
+        expires: new Date(Date.now() + +process.env.JWT_REFRESH_EXPIRE),
         user: { connect: { id: user.id } },
       },
     });

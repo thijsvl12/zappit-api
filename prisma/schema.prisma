@@ -20,10 +20,10 @@ model User {
 }
 
 model RefreshToken {
-  id        String  @id @default(cuid())
-  isRevoked Boolean @default(false)
-  expires   Int
-  user      User    @relation(fields: [userId], references: [id])
+  id        String   @id @default(cuid())
+  isRevoked Boolean  @default(false)
+  expires   DateTime
+  user      User     @relation(fields: [userId], references: [id])
   userId    String
 }
 
