@@ -64,6 +64,14 @@ export class UserService {
     return user;
   }
 
+  async findById(id: string): Promise<User> {
+    return await this.prisma.user.findFirst({
+      where: {
+        id,
+      },
+    });
+  }
+
   async findByUsername(username: string): Promise<User> {
     return await this.prisma.user.findFirst({
       where: {

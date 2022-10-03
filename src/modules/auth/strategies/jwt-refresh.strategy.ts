@@ -1,15 +1,21 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
+import { JwtPayload } from '@interfaces/jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
+import { TokenService } from '@modules/token/token.service';
+import { UserService } from '@modules/user/user.service';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
   Strategy,
   'jwt-refresh',
 ) {
-  constructor() {
+  constructor(
+    private readonly tokenService: TokenService,
+    private readonly userService: UserService,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request) => {
@@ -24,13 +30,22 @@ export class JwtRefreshStrategy extends PassportStrategy(
       ]),
       ignoreExpiration: false,
       secretOrKey: process.env.JWT_SECRET,
-      passReqToCallback: true,
     });
   }
 
-  async validate(req: Request): Promise<any> {
-    const refresh_token = req.cookies?.['zappit_rt'];
+  async validate(payload: JwtPayload): Promise<any> {
+    const token = await this.tokenService.findById(payload.jwtid);
 
-    return refresh_token;
+    if (!token) {
+      throw new HttpException('token_not_found', HttpStatus.UNAUTHORIZED);
+    }
+
+    const user = await this.userService.findById(token.userId);
+
+    if (!user) {
+      throw new HttpException('invalid_token', HttpStatus.UNAUTHORIZED);
+    }
+
+    return user;
   }
 }
