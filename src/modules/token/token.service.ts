@@ -1,5 +1,6 @@
+import { JwtService, JwtSignOptions } from '@nestjs/jwt';
+
 import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '@modules/prisma/prisma.service';
 import { User } from '@prisma/client';
 
@@ -11,33 +12,34 @@ export class TokenService {
   ) {}
 
   public generateAccessToken(user: User): Promise<string> {
-    const payload: JwtPayload = { username: user.username };
+    // Expires in 30 minutes
+    const expiresIn = 60 * 60 * 30;
 
-    return this.jwtService.signAsync(payload, {
-      expiresIn: +process.env.JWT_ACCESS_EXPIRE,
-    });
+    const signOptions: JwtSignOptions = {
+      subject: user.username,
+      expiresIn,
+    };
+
+    return this.jwtService.signAsync({}, signOptions);
   }
 
   public async generateRefreshToken(user: User): Promise<string> {
+    // Expires in 60 days
+    const expiresIn = 60 * 60 * 24 * 60;
+
     const token = await this.prisma.refreshToken.create({
       data: {
-        expires: new Date(Date.now() + +process.env.JWT_REFRESH_EXPIRE),
+        expires: new Date(Date.now() + 1000 * expiresIn),
         user: { connect: { id: user.id } },
       },
     });
 
-    const payload: JwtPayload = {
-      username: user.username,
+    const signOptions: JwtSignOptions = {
+      subject: user.username,
       jwtid: token.id,
+      expiresIn,
     };
 
-    return this.jwtService.signAsync(payload, {
-      expiresIn: +process.env.JWT_REFRESH_EXPIRE,
-    });
+    return this.jwtService.signAsync({}, signOptions);
   }
-}
-
-export interface JwtPayload {
-  username: string;
-  jwtid?: string;
 }

@@ -29,13 +29,15 @@ export class UserService {
     });
   }
 
-  async create(userData: CreateUserDto): Promise<any> {
+  async create(userData: CreateUserDto): Promise<User> {
     const userInDb = await this.prisma.user.findFirst({
       where: { username: userData.username },
     });
+
     if (userInDb) {
       throw new HttpException('user_already_exist', HttpStatus.CONFLICT);
     }
+
     return await this.prisma.user.create({
       data: {
         ...userData,

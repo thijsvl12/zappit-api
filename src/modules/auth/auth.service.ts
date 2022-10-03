@@ -12,24 +12,13 @@ export class AuthService {
     private readonly tokenService: TokenService,
   ) {}
 
-  async register(userDto: CreateUserDto): Promise<RegistrationStatus> {
-    let status: RegistrationStatus = {
-      success: true,
-      message: 'ACCOUNT_CREATE_SUCCESS',
-    };
-
-    try {
-      status.data = await this.userService.create(userDto);
-    } catch (err) {
-      status = {
-        success: false,
-        message: err,
-      };
-    }
-    return status;
+  async register(userDto: CreateUserDto): Promise<User> {
+    return await this.userService.create(userDto);
   }
 
-  async login(loginUserDto: LoginUserDto): Promise<LoginResult> {
+  async login(
+    loginUserDto: LoginUserDto,
+  ): Promise<User & { access_token: string; refresh_token: string }> {
     const user = await this.userService.findByLogin(loginUserDto);
 
     const accessToken = await this.tokenService.generateAccessToken(user);
@@ -38,19 +27,7 @@ export class AuthService {
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
-      data: user,
+      ...user,
     };
   }
-}
-
-export interface RegistrationStatus {
-  success: boolean;
-  message: string;
-  data?: User;
-}
-
-export interface LoginResult {
-  access_token: string;
-  refresh_token: string;
-  data: User;
 }
