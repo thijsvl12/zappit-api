@@ -14,8 +14,10 @@ export class AuthController {
   @Post('register')
   public async register(
     @Body() createUserDto: CreateUserDto,
-  ): Promise<DataResponse<User>> {
-    return { data: await this.authService.register(createUserDto) };
+  ): Promise<DataResponse<Omit<User, 'password'>>> {
+    const user = await this.authService.createUser(createUserDto);
+
+    return { data: user };
   }
 
   @Post('login')
@@ -23,7 +25,7 @@ export class AuthController {
     @Body() loginUserDto: LoginUserDto,
     @Res({ passthrough: true }) res: Response,
   ): Promise<DataResponse<User & { access_token: string }>> {
-    const { refresh_token, ...result } = await this.authService.login(
+    const { refresh_token, ...user } = await this.authService.validateUser(
       loginUserDto,
     );
 
@@ -32,7 +34,7 @@ export class AuthController {
       domain: process.env.EXTERNAL_DOMAIN,
     });
 
-    return { data: result };
+    return { data: user };
   }
 
   @UseGuards(JwtRefreshAuthGuard)

@@ -30,38 +30,12 @@ export class UserService {
   }
 
   async create(userData: CreateUserDto): Promise<User> {
-    const userInDb = await this.prisma.user.findFirst({
-      where: { username: userData.username },
-    });
-
-    if (userInDb) {
-      throw new HttpException('user_already_exist', HttpStatus.CONFLICT);
-    }
-
     return await this.prisma.user.create({
       data: {
         ...userData,
         password: await hash(userData.password, 10),
       },
     });
-  }
-
-  async findByLogin({ username, password }: LoginUserDto): Promise<User> {
-    const user = await this.prisma.user.findFirst({
-      where: { username },
-    });
-
-    if (!user) {
-      throw new HttpException('invalid_credentials', HttpStatus.UNAUTHORIZED);
-    }
-
-    const areEqual = await compare(password, user.password);
-
-    if (!areEqual) {
-      throw new HttpException('invalid_credentials', HttpStatus.UNAUTHORIZED);
-    }
-
-    return user;
   }
 
   async findById(id: string): Promise<User> {
