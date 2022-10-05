@@ -1,4 +1,3 @@
-import { JwtRefreshAuthGuard } from '@guards/jwt-refresh-auth.guard';
 import { CreateUserDto } from '@modules/user/dto/create-user.input';
 import { LoginUserDto } from '@modules/user/dto/login-user.input';
 import {
@@ -12,6 +11,7 @@ import {
 import { User } from '@prisma/client';
 import { Request } from 'express';
 import { AuthService } from './auth.service';
+import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
 import { TokenInterceptor } from './interceptors/token.interceptor';
 
 @Controller('auth')
@@ -32,6 +32,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtRefreshAuthGuard)
+  @UseInterceptors(TokenInterceptor)
   @Post('refresh')
   public refresh(@Req() req: Request) {
     return req.user;
