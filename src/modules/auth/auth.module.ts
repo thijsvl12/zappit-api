@@ -10,7 +10,7 @@ import { UserService } from '@modules/user/user.service';
 @Module({
   imports: [
     JwtModule.register({
-      secret: process.env.JWT_SECRET,
+      secret: process.env.APP_SECRET,
     }),
   ],
   providers: [

@@ -6,6 +6,7 @@ import { TokenService } from '@modules/token/token.service';
 import { User } from '@prisma/client';
 import { UserService } from '@modules/user/user.service';
 import { compare } from 'bcrypt';
+import { exclude } from '@utils/object.util';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +15,7 @@ export class AuthService {
     private readonly tokenService: TokenService,
   ) {}
 
-  async createUser(userDto: CreateUserDto): Promise<Omit<User, 'password'>> {
+  async register(userDto: CreateUserDto): Promise<Omit<User, 'password'>> {
     const userInDb = await this.userService.findByUsername(userDto.username);
 
     if (userInDb) {
@@ -22,14 +23,11 @@ export class AuthService {
     }
 
     const user = await this.userService.create(userDto);
-    delete user.password;
 
-    return user;
+    return exclude(user, 'password');
   }
 
-  async validateUser(
-    loginUserDto: LoginUserDto,
-  ): Promise<User & { access_token: string; refresh_token: string }> {
+  async login(loginUserDto: LoginUserDto): Promise<User> {
     const user = await this.userService.findByUsername(loginUserDto.username);
 
     if (!user) {
@@ -42,13 +40,6 @@ export class AuthService {
       throw new HttpException('invalid_credentials', HttpStatus.UNAUTHORIZED);
     }
 
-    const accessToken = await this.tokenService.generateAccessToken(user);
-    const refreshToken = await this.tokenService.generateRefreshToken(user);
-
-    return {
-      access_token: accessToken,
-      refresh_token: refreshToken,
-      ...user,
-    };
+    return user;
   }
 }

@@ -1,7 +1,6 @@
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 
 import { Injectable } from '@nestjs/common';
-import { JwtPayload } from '@interfaces/jwt';
 import { PrismaService } from '@modules/prisma/prisma.service';
 import { User } from '@prisma/client';
 
@@ -20,19 +19,16 @@ export class TokenService {
     });
   }
 
-  public generateAccessToken(user: User): Promise<string> {
+  public async generateAccessToken(user: User): Promise<string> {
     // Expires in 30 minutes
     const expiresIn = 60 * 60 * 30;
 
-    const payload: JwtPayload = {
-      username: user.username,
-    };
-
     const signOptions: JwtSignOptions = {
+      subject: user.username,
       expiresIn,
     };
 
-    return this.jwtService.signAsync(payload, signOptions);
+    return this.jwtService.signAsync({}, signOptions);
   }
 
   public async generateRefreshToken(user: User): Promise<string> {
@@ -46,15 +42,12 @@ export class TokenService {
       },
     });
 
-    const payload: JwtPayload = {
-      username: user.username,
-    };
-
     const signOptions: JwtSignOptions = {
+      subject: user.username,
       jwtid: token.id,
       expiresIn,
     };
 
-    return this.jwtService.signAsync(payload, signOptions);
+    return this.jwtService.signAsync({}, signOptions);
   }
 }

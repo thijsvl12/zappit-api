@@ -1,7 +1,7 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
-import { JwtPayload } from '@interfaces/jwt';
+import { JwtPayload } from '../interfaces/jwt.interface';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { TokenService } from '@modules/token/token.service';
@@ -19,7 +19,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request) => {
-          const refresh_token = req.cookies?.['zappit_rt'];
+          const refresh_token = req.signedCookies?.['zappit_rt'];
 
           if (!refresh_token) {
             throw new HttpException('token_not_found', HttpStatus.UNAUTHORIZED);
@@ -29,7 +29,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
         },
       ]),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET,
+      secretOrKey: process.env.APP_SECRET,
     });
   }
 
