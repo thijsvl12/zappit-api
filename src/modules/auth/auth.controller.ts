@@ -1,6 +1,5 @@
 import { User } from '@decorators/user.decorator';
 import { CreateUserDto } from '@modules/user/dto/create-user.input';
-import { LoginUserDto } from '@modules/user/dto/login-user.input';
 import {
   Body,
   Controller,
@@ -10,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
+import { LocalAuthGuard } from './guards/local-auth.guard';
 import { TokenInterceptor } from './interceptors/token.interceptor';
 
 @Controller('auth')
@@ -22,14 +22,15 @@ export class AuthController {
   }
 
   @Post('login')
+  @UseGuards(LocalAuthGuard)
   @UseInterceptors(TokenInterceptor)
-  public async login(@Body() loginUserDto: LoginUserDto) {
-    return await this.authService.login(loginUserDto);
+  public async login(@User() user) {
+    return user;
   }
 
+  @Post('refresh')
   @UseGuards(JwtRefreshAuthGuard)
   @UseInterceptors(TokenInterceptor)
-  @Post('refresh')
   public refresh(@User() user) {
     return user;
   }
