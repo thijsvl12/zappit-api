@@ -1,6 +1,7 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
+import { JWT_COOKIE_PREFIX } from '@constants/jwt.constant';
 import { JwtPayload } from '../interfaces/jwt.interface';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
@@ -19,7 +20,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request) => {
-          const refresh_token = req.signedCookies?.['zappit_rt'];
+          const refresh_token = req.signedCookies?.[JWT_COOKIE_PREFIX + '_rt'];
 
           if (!refresh_token) {
             throw new HttpException('token_not_found', HttpStatus.UNAUTHORIZED);

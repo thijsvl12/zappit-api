@@ -5,6 +5,7 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 
+import { JWT_COOKIE_PREFIX } from '@constants/jwt.constant';
 import { Observable } from 'rxjs';
 import type { Response } from 'express';
 import { TokenService } from '@modules/token/token.service';
@@ -25,7 +26,7 @@ export class RefreshTokenInterceptor implements NestInterceptor {
 
         const token = await this.tokenService.generateRefreshToken(user);
 
-        res.cookie('zappit_rt', token, {
+        res.cookie(JWT_COOKIE_PREFIX + '_rt', token, {
           httpOnly: true,
           signed: true,
           sameSite: 'strict',

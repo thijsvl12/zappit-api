@@ -1,3 +1,4 @@
+import { JWT_ACCESS_EXP, JWT_REFRESH_EXP } from '@constants/jwt.constant';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 
 import { Injectable } from '@nestjs/common';
@@ -20,24 +21,18 @@ export class TokenService {
   }
 
   public async generateAccessToken(user: User): Promise<string> {
-    // Expires in 30 minutes
-    const expiresIn = 60 * 60 * 30;
-
     const signOptions: JwtSignOptions = {
       subject: user.username,
-      expiresIn,
+      expiresIn: JWT_ACCESS_EXP,
     };
 
     return this.jwtService.signAsync({}, signOptions);
   }
 
   public async generateRefreshToken(user: User): Promise<string> {
-    // Expires in 60 days
-    const expiresIn = 60 * 60 * 24 * 60;
-
     const token = await this.prisma.refreshToken.create({
       data: {
-        expires: new Date(Date.now() + 1000 * expiresIn),
+        expires: new Date(Date.now() + 1000 * JWT_REFRESH_EXP),
         user: { connect: { id: user.id } },
       },
     });
@@ -45,7 +40,7 @@ export class TokenService {
     const signOptions: JwtSignOptions = {
       subject: user.username,
       jwtid: token.id,
-      expiresIn,
+      expiresIn: JWT_REFRESH_EXP,
     };
 
     return this.jwtService.signAsync({}, signOptions);

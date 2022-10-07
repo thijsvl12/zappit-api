@@ -1,0 +1,5 @@
+const JWT_COOKIE_PREFIX = 'zappit';
+const JWT_REFRESH_EXP = 60 * 60 * 24 * 60;
+const JWT_ACCESS_EXP = 60 * 15;
+
+export { JWT_COOKIE_PREFIX, JWT_REFRESH_EXP, JWT_ACCESS_EXP };
