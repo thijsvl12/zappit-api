@@ -2,20 +2,16 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
 import { CreateUserDto } from '@modules/user/dto/create-user.input';
 import { LoginUserDto } from '@modules/user/dto/login-user.input';
-import { TokenService } from '@modules/token/token.service';
-import { User } from '@prisma/client';
+import { PaswordlessUser } from '@modules/user/types/user.type';
 import { UserService } from '@modules/user/user.service';
 import { compare } from 'bcrypt';
 import { exclude } from '@utils/object.util';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private readonly userService: UserService,
-    private readonly tokenService: TokenService,
-  ) {}
+  constructor(private readonly userService: UserService) {}
 
-  async register(userDto: CreateUserDto): Promise<Omit<User, 'password'>> {
+  async register(userDto: CreateUserDto): Promise<PaswordlessUser> {
     const userInDb = await this.userService.findByUsername(userDto.username);
 
     if (userInDb) {
@@ -27,7 +23,7 @@ export class AuthService {
     return exclude(user, 'password');
   }
 
-  async login(loginUserDto: LoginUserDto): Promise<User> {
+  async login(loginUserDto: LoginUserDto): Promise<PaswordlessUser> {
     const user = await this.userService.findByUsername(loginUserDto.username);
 
     if (!user) {
@@ -40,6 +36,6 @@ export class AuthService {
       throw new HttpException('invalid_credentials', HttpStatus.UNAUTHORIZED);
     }
 
-    return user;
+    return exclude(user, 'password');
   }
 }
