@@ -5,9 +5,11 @@ import { ConfigService } from '@nestjs/config';
 import { JWT_COOKIE_PREFIX } from '@constants/jwt.constant';
 import { JwtPayload } from '../interfaces/jwt.interface';
 import { PassportStrategy } from '@nestjs/passport';
+import { PaswordlessUser } from '@modules/user/interfaces/user.interface';
 import { Request } from 'express';
 import { TokenService } from '@modules/token/token.service';
 import { UserService } from '@modules/user/user.service';
+import { exclude } from '@utils/object.util';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -36,7 +38,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
     });
   }
 
-  async validate(payload: JwtPayload): Promise<any> {
+  async validate(payload: JwtPayload): Promise<PaswordlessUser> {
     const token = await this.tokenService.findById(payload.jwtid);
 
     if (!token) {
@@ -49,6 +51,6 @@ export class JwtRefreshStrategy extends PassportStrategy(
       throw new HttpException('invalid_token', HttpStatus.UNAUTHORIZED);
     }
 
-    return user;
+    return exclude(user, 'password');
   }
 }
