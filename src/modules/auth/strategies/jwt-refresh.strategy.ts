@@ -1,6 +1,7 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
+import { ConfigService } from '@nestjs/config';
 import { JWT_COOKIE_PREFIX } from '@constants/jwt.constant';
 import { JwtPayload } from '../interfaces/jwt.interface';
 import { PassportStrategy } from '@nestjs/passport';
@@ -16,6 +17,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
   constructor(
     private readonly tokenService: TokenService,
     private readonly userService: UserService,
+    private readonly configService: ConfigService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
@@ -30,7 +32,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
         },
       ]),
       ignoreExpiration: false,
-      secretOrKey: process.env.APP_SECRET,
+      secretOrKey: configService.get<string>('APP_SECRET'),
     });
   }
 

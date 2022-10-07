@@ -5,6 +5,7 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 
+import { ConfigService } from '@nestjs/config';
 import { JWT_COOKIE_PREFIX } from '@constants/jwt.constant';
 import { Observable } from 'rxjs';
 import type { Response } from 'express';
@@ -14,7 +15,10 @@ import { mergeMap } from 'rxjs/operators';
 
 @Injectable()
 export class RefreshTokenInterceptor implements NestInterceptor {
-  constructor(private readonly tokenService: TokenService) {}
+  constructor(
+    private readonly tokenService: TokenService,
+    private readonly configService: ConfigService,
+  ) {}
 
   intercept(
     context: ExecutionContext,
@@ -30,7 +34,7 @@ export class RefreshTokenInterceptor implements NestInterceptor {
           httpOnly: true,
           signed: true,
           sameSite: 'strict',
-          secure: process.env.NODE_ENV === 'production',
+          secure: this.configService.get<string>('NODE_ENV') === 'production',
         });
 
         return user;
