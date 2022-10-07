@@ -12,7 +12,7 @@ import { User } from '@prisma/client';
 import { mergeMap } from 'rxjs/operators';
 
 @Injectable()
-export class TokenInterceptor implements NestInterceptor {
+export class RefreshTokenInterceptor implements NestInterceptor {
   constructor(private readonly tokenService: TokenService) {}
 
   intercept(
@@ -23,9 +23,14 @@ export class TokenInterceptor implements NestInterceptor {
       mergeMap(async (user) => {
         const res = context.switchToHttp().getResponse<Response>();
 
-        const token = await this.tokenService.generateAccessToken(user);
+        const token = await this.tokenService.generateRefreshToken(user);
 
-        res.setHeader('Authorization', `Bearer ${token}`);
+        res.cookie('zappit_rt', token, {
+          httpOnly: true,
+          signed: true,
+          sameSite: 'strict',
+          secure: process.env.NODE_ENV === 'production',
+        });
 
         return user;
       }),

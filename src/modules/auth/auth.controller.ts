@@ -10,6 +10,7 @@ import {
 import { AuthService } from './auth.service';
 import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
+import { RefreshTokenInterceptor } from './interceptors/refresh-token.interceptor';
 import { TokenInterceptor } from './interceptors/token.interceptor';
 
 @Controller('auth')
@@ -23,7 +24,7 @@ export class AuthController {
 
   @Post('login')
   @UseGuards(LocalAuthGuard)
-  @UseInterceptors(TokenInterceptor)
+  @UseInterceptors(TokenInterceptor, RefreshTokenInterceptor)
   public async login(@User() user) {
     return user;
   }
