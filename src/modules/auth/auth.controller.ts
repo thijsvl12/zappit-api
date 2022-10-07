@@ -1,8 +1,10 @@
 import { User } from '@decorators/user.decorator';
-import { CreateUserDto } from '@modules/user/dto/create-user.input';
+import { CreateUserDto } from '@modules/user/dtos/create-user.input';
 import {
   Body,
   Controller,
+  HttpCode,
+  HttpStatus,
   Post,
   UseGuards,
   UseInterceptors,
@@ -23,6 +25,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
   @UseInterceptors(TokenInterceptor, RefreshTokenInterceptor)
   public async login(@User() user) {
