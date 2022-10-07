@@ -1,5 +1,7 @@
+import { User } from '@decorators/user.decorator';
 import { JwtAuthGuard } from '@modules/auth/guards/jwt-auth.guard';
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
+import { exclude } from '@utils/object.util';
 
 import { UserService } from './user.service';
 
@@ -9,7 +11,7 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  public async me(@Req() req) {
-    return req.user;
+  public async me(@User() user) {
+    return exclude(user, 'password');
   }
 }
